@@ -2,56 +2,64 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOS Master Pro 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yaring TOS Final Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit'; margin:0; background:#f0f2f5; color:#333; }
-        .header { background:#001a68; color:white; padding:15px; display:flex; justify-content:space-between; position:sticky; top:0; z-index:100; }
-        .container { padding:12px; max-width:800px; margin:auto; }
-        .card { background:white; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        :root { --main: #001a68; --sub: #f0f2f5; }
+        body { font-family: 'Kanit'; margin: 0; background: var(--sub); }
+        .header { background: var(--main); color: white; padding: 15px; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .container { padding: 12px; max-width: 800px; margin: auto; }
+        .card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        /* Table & Layout */
-        table { width:100%; border-collapse:collapse; margin-top:10px; }
-        th, td { padding:10px; border-bottom:1px solid #eee; text-align:center; }
-        .top-two { background:#e8f5e9; font-weight:bold; }
-        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+        .top-two { background: #e8f5e9; font-weight: 600; color: #2e7d32; }
+
         /* Match Box */
-        .match { border:1px solid #eee; padding:12px; border-radius:10px; margin-bottom:10px; background:#fff; }
-        .score-row { display:flex; justify-content:space-between; align-items:center; font-size:18px; }
-        .team-name { width:35%; font-weight:600; }
-        .score-num { font-size:24px; font-weight:bold; color:#001a68; min-width:50px; }
+        .match { border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 10px; background: #fff; }
+        .score-row { display: flex; justify-content: space-between; align-items: center; }
+        .team { width: 35%; font-weight: 600; font-size: 16px; }
+        .score-num { font-size: 28px; font-weight: 800; color: var(--main); min-width: 60px; text-align: center; }
         
-        /* Buttons - ออกแบบให้กดง่ายในสนาม */
-        .btn-plus { width:45px; height:45px; border-radius:50%; border:none; background:#001a68; color:white; font-size:20px; cursor:pointer; }
-        .btn-plus:active { transform: scale(0.9); }
-        .btn-util { padding:8px 15px; border-radius:8px; border:1px solid #ddd; background:#f8f9fa; cursor:pointer; margin-top:8px; font-family:'Kanit'; }
+        /* Buttons */
+        .btn-plus { width: 45px; height: 45px; border-radius: 50%; border: none; background: var(--main); color: white; font-size: 24px; cursor: pointer; }
+        .btn-plus:active { transform: scale(0.9); opacity: 0.8; }
+        .btn-action { padding: 8px 16px; border-radius: 8px; border: 1px solid #ddd; background: #f8f9fa; cursor: pointer; font-family: 'Kanit'; margin: 5px; }
         
-        .admin-only { display:none; }
-        body[data-role="admin"] .admin-only { display:inline-block; }
-        .hidden { display:none; }
+        .admin-controls { display: none; margin-top: 10px; border-top: 1px solid #eee; pt: 10px; text-align: center; }
+        body[data-role="admin"] .admin-controls { display: block; }
+        .hidden { display: none; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 8px; font-family: 'Kanit'; }
     </style>
 </head>
 <body data-role="user">
 
 <div class="header">
-    <div>⚽ TOS MASTER PRO</div>
-    <div onclick="auth()" style="cursor:pointer">👤 <span id="role-label">Viewer</span></div>
+    <div style="font-weight:600">⚽ YARING TOS MASTER</div>
+    <div onclick="auth()" style="cursor:pointer; background:rgba(255,255,255,0.2); padding:4px 12px; border-radius:20px;">
+        👤 <span id="role-label">Viewer</span>
+    </div>
 </div>
 
 <div class="container">
-    <div id="setup-area" class="card hidden admin-only">
-        <h3>ตั้งค่าทีม (10 ทีม)</h3>
-        <div id="inputs" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
-        <button onclick="start()" class="btn-util" style="width:100%; background:#001a68; color:white; margin-top:15px; padding:15px;">เริ่มทัวร์นาเมนต์</button>
+    <div id="setup-area" class="card hidden">
+        <h3>⚙️ ตั้งค่าทีมแข่ง</h3>
+        <div id="selectors"></div>
+        <button onclick="start()" style="width:100%; padding:15px; background:var(--main); color:white; border:none; border-radius:10px; font-weight:600; margin-top:10px;">เริ่มทัวร์นาเมนต์</button>
     </div>
 
     <div id="main-area" class="hidden">
+        <div id="champ-box" class="card hidden" style="text-align:center; border: 3px solid #ffc107;">
+            <h2 style="margin:0; color:#ffc107;">🏆 CHAMPION 🏆</h2>
+            <h1 id="champ-name" style="margin:10px 0; font-size:32px; color:var(--main);"></h1>
+        </div>
+
         <div class="card">
-            <h4>📊 ตารางคะแนน</h4>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div><small>สาย A</small><table id="tableA"></table></div>
-                <div><small>สาย B</small><table id="tableB"></table></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div><h4 style="margin:0 0 10px 0">สาย A</h4><table id="tableA"></table></div>
+                <div><h4 style="margin:0 0 10px 0">สาย B</h4><table id="tableB"></table></div>
             </div>
         </div>
 
@@ -61,7 +69,7 @@
         <h4>🏟️ สนาม 2 (สาย B)</h4>
         <div id="field2"></div>
 
-        <div id="ko-section" class="hidden">
+        <div id="ko-area" class="hidden">
             <h4 style="color:#d63031">🔥 รอบน็อคเอาท์</h4>
             <div id="ko-list"></div>
         </div>
@@ -72,43 +80,61 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "YOUR_KEY", authDomain: "YOUR_DOMAIN", projectId: "YOUR_PROJECT" };
+    const firebaseConfig = { 
+        apiKey: "YOUR_KEY", 
+        authDomain: "YOUR_ID.firebaseapp.com", 
+        projectId: "YOUR_ID" 
+    };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const ref = doc(db, "tos", "main");
+    const ref = doc(db, "tos_final", "data");
 
     let state = null;
     let busy = false;
-    let lastAction = null; // จุดที่ดีที่สุด: เก็บประวัติ Undo
+    let lastAction = null;
 
     // --- AUTH ---
     window.auth = () => {
-        const p = prompt("Password?");
+        const p = prompt("ระบุรหัสผ่าน Admin");
         document.body.dataset.role = (p === "admin") ? "admin" : "user";
         document.getElementById("role-label").innerText = document.body.dataset.role.toUpperCase();
         render();
     };
 
-    // --- SETUP ---
-    const inputDiv = document.getElementById("inputs");
-    for(let i=0; i<10; i++) inputDiv.innerHTML += `<input type="text" class="t-in" placeholder="ทีม ${i+1}" style="padding:8px; border-radius:5px; border:1px solid #ccc;">`;
+    // --- SETUP SELECTORS ---
+    const ALL_TEAMS = ["ทีม A", "ทีม B", "ทีม C", "ทีม D", "ทีม E", "ทีม F", "ทีม G", "ทีม H", "ทีม I", "ทีม J"];
+    const selDiv = document.getElementById("selectors");
+    for(let i=0; i<10; i++){
+        let s = `<select class="t-sel"><option value="">-- เลือกทีมที่ ${i+1} --</option>`;
+        ALL_TEAMS.forEach(t => s += `<option value="${t}">${t}</option>`);
+        selDiv.innerHTML += s + `</select>`;
+    }
 
+    // --- START TOURNAMENT ---
     window.start = async () => {
-        const names = [...document.querySelectorAll(".t-in")].map(i => i.value.trim()).filter(v => v);
-        if(new Set(names).size < 10) return alert("ใส่ชื่อให้ครบ 10 ทีมและห้ามซ้ำ");
+        const vals = [...document.querySelectorAll(".t-sel")].map(s => s.value);
+        if(new Set(vals.filter(v => v)).size < 10) return alert("กรุณาเลือกทีมให้ครบและไม่ซ้ำกัน!");
 
         const rr = [[0,1],[2,3],[4,0],[1,2],[3,4],[0,2],[1,3],[4,2],[0,3],[1,4]];
         let f = [];
         rr.forEach((p, i) => {
-            f.push({ id:`A${i}`, field:1, group:'A', h:names[p[0]], a:names[p[1]], hS:0, aS:0, p:false, locked:false });
-            f.push({ id:`B${i}`, field:2, group:'B', h:names[p[0]+5], a:names[p[1]+5], hS:0, aS:0, p:false, locked:false });
+            f.push({ id:`A${i}`, field:1, group:'A', h:vals[p[0]], a:vals[p[1]], hS:0, aS:0, p:false, locked:false });
+            f.push({ id:`B${i}`, field:2, group:'B', h:vals[p[0]+5], a:vals[p[1]+5], hS:0, aS:0, p:false, locked:false });
         });
 
-        await setDoc(ref, { started:true, teams:names, fixtures:f, koGenerated:false, ko:[] });
+        await setDoc(ref, { 
+            started: true, fixtures: f, koReady: false, 
+            ko: [
+                {id:'SF1', h:'A1', a:'B2', hS:0, aS:0, hPK:0, aPK:0, p:false, locked:false, ph:true},
+                {id:'SF2', h:'B1', a:'A2', hS:0, aS:0, hPK:0, aPK:0, p:false, locked:false, ph:true},
+                {id:'FINAL', h:'Winner 1', a:'Winner 2', hS:0, aS:0, hPK:0, aPK:0, p:false, locked:false, ph:true}
+            ]
+        });
     };
 
-    // --- CORE LOGIC: SCORE (จุดที่ดีที่สุด: Busy Lock + Transaction) ---
-    window.modScore = async (id, side, val, isKO = false) => {
+    // --- SCORE ENGINE (จุดที่ดีที่สุด: Busy Lock + Transaction) ---
+    window.mod = async (id, side, val, isKO = false) => {
         if(busy) return;
         busy = true;
 
@@ -120,14 +146,11 @@
             const m = {...list[idx]};
 
             if(m.locked) return;
-            
-            // เก็บสถานะก่อนหน้าไว้ Undo
-            lastAction = JSON.stringify({id, data: list[idx]});
+            lastAction = JSON.stringify({id, isKO, data: list[idx]}); // เก็บไว้ Undo
 
             m.p = true;
             side === 'h' ? m.hS = Math.max(0, m.hS + val) : m.aS = Math.max(0, m.aS + val);
             
-            list[idx] = m;
             tx.update(ref, isKO ? { ko: d.ko } : { fixtures: d.fixtures });
         });
         setTimeout(() => busy = false, 200);
@@ -136,19 +159,27 @@
     window.undo = async (id, isKO = false) => {
         if(!lastAction) return;
         const last = JSON.parse(lastAction);
-        if(last.id !== id) return alert("Undo ได้เฉพาะคู่ล่าสุดที่เพิ่งกดไปเท่านั้น");
+        if(last.id !== id) return alert("Undo ได้เฉพาะคู่ล่าสุดเท่านั้น");
 
-        await updateDoc(ref, { [isKO ? 'ko' : 'fixtures']: state[isKO ? 'ko' : 'fixtures'].map(m => m.id === id ? last.data : m) });
+        await runTransaction(db, async (tx) => {
+            const snap = await tx.get(ref);
+            const d = snap.data();
+            const list = isKO ? d.ko : d.fixtures;
+            const idx = list.findIndex(m => m.id === id);
+            list[idx] = last.data;
+            tx.update(ref, isKO ? { ko: d.ko } : { fixtures: d.fixtures });
+        });
         lastAction = null;
     };
 
     window.lock = async (id, isKO = false) => {
-        if(!confirm("ยืนยันการล็อคผล?")) return;
-        const list = isKO ? 'ko' : 'fixtures';
-        await updateDoc(ref, { [list]: state[list].map(m => m.id === id ? {...m, locked:true} : m) });
+        if(!confirm("ยืนยันผลการแข่งขัน? เมื่อล็อคแล้วจะแก้ไขไม่ได้")) return;
+        const listName = isKO ? 'ko' : 'fixtures';
+        const newList = state[listName].map(m => m.id === id ? {...m, locked:true} : m);
+        await updateDoc(ref, { [listName]: newList });
     };
 
-    // --- RENDER ---
+    // --- CALCULATION ---
     function calc(group) {
         let d = {};
         state.fixtures.filter(m => m.group === group).forEach(m => {
@@ -161,54 +192,55 @@
         return Object.values(d).sort((a,b) => b.pts - a.pts || b.gd - a.gd);
     }
 
+    // --- RENDER ---
     function render() {
         if(!state) { document.getElementById("setup-area").classList.remove("hidden"); return; }
         document.getElementById("setup-area").classList.add("hidden");
         document.getElementById("main-area").classList.remove("hidden");
 
-        const showTable = (group, id) => {
-            const data = calc(group);
-            document.getElementById(id).innerHTML = data.map((t, i) => `<tr class="${i<2?'top-two':''}"><td>${t.name}</td><td>${t.pts}</td></tr>`).join("");
-            return data;
+        const rA = calc('A'); const rB = calc('B');
+        const drawTable = (data, el) => {
+            el.innerHTML = `<tr><th>ทีม</th><th>GD</th><th>P</th></tr>` + 
+            data.map((t, i) => `<tr class="${i<2?'top-two':''}"><td>${t.name}</td><td>${t.gd}</td><td>${t.pts}</td></tr>`).join("");
         };
-        const rA = showTable('A', 'tableA');
-        const rB = showTable('B', 'tableB');
+        drawTable(rA, tableA); drawTable(rB, tableB);
 
-        const showMatch = (f, el) => {
-            el.innerHTML = state.fixtures.filter(m => m.field === f).map(m => `
+        const drawMatch = (f, el, isKO = false) => {
+            const list = isKO ? state.ko : state.fixtures.filter(m => m.field === f);
+            el.innerHTML = list.map(m => `
                 <div class="match">
                     <div class="score-row">
-                        <div class="team-name" style="text-align:right">${m.h}</div>
-                        <div class="admin-only"><button class="btn-plus" onclick="modScore('${m.id}','h',1)">+</button></div>
-                        <div class="score-num">${m.hS} - ${m.aS}</div>
-                        <div class="admin-only"><button class="btn-plus" onclick="modScore('${m.id}','a',1)">+</button></div>
-                        <div class="team-name" style="text-align:left">${m.a}</div>
+                        <div class="team" style="text-align:right">${m.h}</div>
+                        <button class="btn-plus admin-controls" onclick="mod('${m.id}','h',1,${isKO})">+</button>
+                        <div class="score-num">${m.hS}-${m.aS}</div>
+                        <button class="btn-plus admin-controls" onclick="mod('${m.id}','a',1,${isKO})">+</button>
+                        <div class="team" style="text-align:left">${m.a}</div>
                     </div>
-                    <div class="admin-only" style="width:100%; text-align:center;">
-                        ${!m.locked ? `<button class="btn-util" onclick="undo('${m.id}')">Undo</button> <button class="btn-util" onclick="lock('${m.id}')">Lock</button>` : '✅ Locked'}
+                    <div class="admin-controls">
+                        ${!m.locked && !m.ph ? `
+                            <button class="btn-action" onclick="undo('${m.id}',${isKO})">Undo</button>
+                            <button class="btn-action" onclick="lock('${m.id}',${isKO})" style="background:var(--main); color:white;">LOCK</button>
+                        ` : (m.ph ? '<small>รอประกบคู่</small>' : '<b>✔ จบการแข่งขัน</b>')}
                     </div>
                 </div>
             `).join("");
         };
-        showMatch(1, field1);
-        showMatch(2, field2);
+        drawMatch(1, field1); drawMatch(2, field2);
 
-        // Auto-Knockout Logic (จุดที่ดีที่สุด: ไขว้สายอัตโนมัติ)
-        if(state.fixtures.every(m => m.locked) && !state.koGenerated && document.body.dataset.role === 'admin') {
-            const ko = [
-                {id:'SF1', h:rA[0].name, a:rB[1].name, hS:0, aS:0, p:false, locked:false},
-                {id:'SF2', h:rB[0].name, a:rA[1].name, hS:0, aS:0, p:false, locked:false}
-            ];
-            updateDoc(ref, { ko, koGenerated: true });
+        // AUTO KO LOGIC
+        if(state.fixtures.every(m => m.locked) && !state.koReady && document.body.dataset.role === 'admin') {
+            const newKO = [...state.ko];
+            newKO[0].h = rA[0].name; newKO[0].a = rB[1].name; newKO[0].ph = false;
+            newKO[1].h = rB[0].name; newKO[1].a = rA[1].name; newKO[1].ph = false;
+            updateDoc(ref, { ko: newKO, koReady: true });
         }
-
-        if(state.koGenerated) {
-            document.getElementById("ko-section").classList.remove("hidden");
-            ko-list.innerHTML = state.ko.map(m => `<div class="match"><b>${m.id}:</b> ${m.h} ${m.hS} - ${m.aS} ${m.a}</div>`).join("");
+        if(state.koReady) {
+            document.getElementById("ko-area").classList.remove("hidden");
+            drawMatch(0, document.getElementById("ko-list"), true);
         }
     }
 
-    onSnapshot(ref, s => { if(s.exists()){ state = s.data(); render(); } });
+    onSnapshot(ref, s => { if(s.exists()) { state = s.data(); render(); } });
 </script>
 </body>
 </html>
