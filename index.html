@@ -1,315 +1,280 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yaring TOS Master Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --p: #001a68; --s: #ffc107; --bg: #f4f7fa; --white: #ffffff; }
-        body { font-family: 'Kanit', sans-serif; margin: 0; background: var(--bg); color: #333; }
-        
-        /* UI Components */
-        .header { background: var(--p); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; sticky: top; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .container { padding: 12px; max-width: 900px; margin: auto; }
-        .card { background: var(--white); padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h3, h4 { margin-top: 0; color: var(--p); display: flex; align-items: center; gap: 8px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournament Pro Ultimate</title>
 
-        /* Table Style */
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th { background: #f8f9fa; color: #666; font-weight: 500; padding: 10px; border-bottom: 2px solid #eee; }
-        td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: center; }
-        .top-two { background: #e8f5e9; font-weight: 500; }
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;600&display=swap" rel="stylesheet">
 
-        /* Fixture Style */
-        .match { border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; position: relative; overflow: hidden; }
-        .match.live { border-left: 5px solid #ff4757; background: #fffcfc; }
-        .match-info { display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
-        .team-name { width: 35%; font-weight: 600; }
-        .score-display { font-size: 24px; font-weight: 800; color: var(--p); min-width: 60px; text-align: center; }
-        
-        /* Buttons */
-        .btn-score { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--p); color: white; font-size: 20px; cursor: pointer; display: none; }
-        body[data-role="admin"] .btn-score { display: inline-block; }
-        .btn-score:active { transform: scale(0.9); opacity: 0.8; }
-        .btn-lock { width: 100%; margin-top: 10px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #f8f9fa; cursor: pointer; font-family: inherit; }
-        
-        .pk-box { margin-top: 10px; padding: 8px; background: #fff3e0; border-radius: 8px; text-align: center; font-size: 13px; }
-        .hidden { display: none; }
-        #champ-name { font-size: 28px; color: #2ed573; text-shadow: 1px 1px 0px #fff; }
-    </style>
+<style>
+body { font-family:'Kanit'; margin:0; background:#f4f6f9; }
+.header { background:#001a68; color:#fff; padding:15px; display:flex; justify-content:space-between; }
+.container { padding:10px; max-width:900px; margin:auto; }
+.card { background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; }
+table { width:100%; border-collapse:collapse; }
+th,td { padding:8px; border-bottom:1px solid #eee; text-align:center; }
+.top { background:#e8f5e9; }
+button { cursor:pointer; }
+.plus { width:36px; height:36px; border-radius:50%; background:#001a68; color:#fff; border:none; }
+.admin { display:none; }
+body[data-role="admin"] .admin { display:inline-block; }
+</style>
 </head>
+
 <body data-role="user">
 
 <div class="header">
-    <div style="font-weight: 600; font-size: 18px;">⚽ Yaring TOS PRO</div>
-    <div onclick="auth()" style="cursor:pointer; background:rgba(255,255,255,0.2); padding:5px 12px; border-radius:20px; font-size:14px;">
-        👤 <span id="role-text">Viewer</span>
-    </div>
+<div>⚽ Tournament PRO</div>
+<div onclick="auth()">👤 <span id="role">viewer</span></div>
 </div>
 
 <div class="container">
-    <div id="setup-area" class="card hidden">
-        <h3>⚙️ ตั้งค่าเริ่มต้น (10 ทีม)</h3>
-        <div id="team-inputs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;"></div>
-        <button onclick="startTournament()" style="width:100%; padding:15px; background:var(--p); color:white; border:none; border-radius:10px; font-weight:600;">เริ่มแข่ง (สร้างตารางอัตโนมัติ)</button>
-    </div>
 
-    <div id="main-area" class="hidden">
-        <div id="champ-card" class="card" style="text-align:center; display:none;">
-            <h3>🏆 CHAMPION</h3>
-            <div id="champ-name"></div>
-        </div>
+<div id="setup" class="card">
+<h3>ตั้งค่าแข่งขัน</h3>
+<div id="selectors"></div>
+<button onclick="start()">เริ่มแข่งขัน</button>
+</div>
 
-        <div class="card">
-            <h4>📊 ตารางคะแนน สาย A</h4>
-            <table id="table-a"></table>
-        </div>
+<div id="main" style="display:none">
 
-        <div class="card">
-            <h4>📊 ตารางคะแนน สาย B</h4>
-            <table id="table-b"></table>
-        </div>
+<div class="card"><h3>🏆 Champion</h3><div id="champ">(รอผล)</div></div>
 
-        <div class="card">
-            <h4>🏟️ สนาม 1 (สาย A)</h4>
-            <div id="fixtures-f1"></div>
-        </div>
+<div class="card"><h4>สาย A</h4><table id="tableA"></table></div>
+<div class="card"><h4>สาย B</h4><table id="tableB"></table></div>
 
-        <div class="card">
-            <h4>🏟️ สนาม 2 (สาย B)</h4>
-            <div id="fixtures-f2"></div>
-        </div>
+<div class="card"><h4>สนาม 1</h4><div id="f1"></div></div>
+<div class="card"><h4>สนาม 2</h4><div id="f2"></div></div>
 
-        <div class="card" id="ko-area">
-            <h4>🔥 รอบ Knockout</h4>
-            <div id="fixtures-ko"></div>
-        </div>
-    </div>
+<div class="card"><h4>Knockout</h4><div id="ko"></div></div>
+
+<button onclick="exportPDF()">📄 Export PDF</button>
+
+</div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // --- CONFIG ---
-    const firebaseConfig = {
-        apiKey: "YOUR_KEY",
-        authDomain: "YOUR_DOMAIN",
-        projectId: "YOUR_ID"
-    };
+// 🔥 ใส่ config ของคุณ
+const firebaseConfig = {
+ apiKey: "YOUR_KEY",
+ authDomain: "YOUR_DOMAIN",
+ projectId: "YOUR_ID"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const ref = doc(db, "tournaments", "yaring-2026");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ref = doc(db,"tos","main");
 
-    let state = null;
-    let busy = false;
+let state=null, lastAction=null, busy=false;
 
-    // --- AUTH SYSTEM ---
-    window.auth = () => {
-        const pass = prompt("Enter Admin Password:");
-        document.body.dataset.role = (pass === "admin") ? "admin" : "user";
-        document.getElementById("role-text").innerText = document.body.dataset.role.toUpperCase();
-        render();
-    };
+const TEAMS = ["ทีม1","ทีม2","ทีม3","ทีม4","ทีม5","ทีม6","ทีม7","ทีม8","ทีม9","ทีม10"];
 
-    const verifyAction = (field) => {
-        if(document.body.dataset.role !== "admin") return false;
-        const pins = { 1: "1111", 2: "2222", 99: "9999" }; // 99 for KO
-        const input = prompt(`ระบุรหัสประจำสนาม ${field === 99 ? 'Knockout' : field}`);
-        return input === pins[field];
-    };
+// ===== SELECTOR =====
+function initSelectors(){
+ selectors.innerHTML="";
+ let selects=[];
+ for(let i=0;i<10;i++){
+  let s=document.createElement("select");
+  s.onchange=update;
+  selects.push(s);
+  selectors.appendChild(s);
+ }
+ function update(){
+  let chosen=selects.map(s=>s.value).filter(Boolean);
+  selects.forEach(s=>{
+   let cur=s.value;
+   s.innerHTML='<option></option>'+TEAMS.filter(t=>!chosen.includes(t)||t===cur)
+   .map(t=>`<option ${t===cur?'selected':''}>${t}</option>`).join('');
+  });
+ }
+ update();
+}
+initSelectors();
 
-    // --- INITIALIZE INPUTS ---
-    const inputContainer = document.getElementById("team-inputs");
-    for(let i=1; i<=10; i++) {
-        inputContainer.innerHTML += `<input type="text" class="t-in" placeholder="ทีมที่ ${i}" style="padding:10px; border:1px solid #ddd; border-radius:8px;">`;
-    }
+// ===== AUTH =====
+window.auth=()=>{
+ let p=prompt("admin?");
+ document.body.dataset.role = p==="admin123"?"admin":"user";
+ role.innerText=document.body.dataset.role;
+};
 
-    // --- LOGIC: START ---
-    window.startTournament = async () => {
-        const names = [...document.querySelectorAll(".t-in")].map(i => i.value.trim()).filter(v => v);
-        if(new Set(names).size < 10) return alert("ระบุชื่อทีมให้ครบ 10 ทีม และห้ามซ้ำกัน!");
+// ===== START =====
+window.start=async()=>{
+ let vals=[...selectors.querySelectorAll("select")].map(s=>s.value);
+ if(new Set(vals).size<10) return alert("เลือกให้ครบ");
 
-        const rr = [[0,1],[2,3],[4,0],[1,2],[3,4],[0,2],[1,3],[4,2],[0,3],[1,4]];
-        let f = [];
-        rr.forEach((p, i) => {
-            f.push({ id:`A${i}`, field:1, group:'A', h:names[p[0]], a:names[p[1]], hS:0, aS:0, p:false, locked:false });
-            f.push({ id:`B${i}`, field:2, group:'B', h:names[p[0]+5], a:names[p[1]+5], hS:0, aS:0, p:false, locked:false });
-        });
+ const rr=[[0,1],[2,3],[4,0],[1,2],[3,4],[0,2],[1,3],[4,2],[0,3],[1,4]];
+ let f=[];
+ rr.forEach((p,i)=>{
+  f.push({id:`F1-${i}`,field:1,group:'A',h:vals[p[0]],a:vals[p[1]],hS:0,aS:0,p:false,locked:false});
+  f.push({id:`F2-${i}`,field:2,group:'B',h:vals[p[0]+5],a:vals[p[1]+5],hS:0,aS:0,p:false,locked:false});
+ });
 
-        await setDoc(ref, { 
-            started: true, teams: names, fixtures: f, koReady: false, 
-            ko: [
-                { id:'SF1', type:'SF', h:'รอผล A1', a:'รอผล B2', hS:0, aS:0, hPK:0, aPK:0, p:false, locked:false, ph:true },
-                { id:'SF2', type:'SF', h:'รอผล B1', a:'รอผล A2', hS:0, aS:0, hPK:0, aPK:0, p:false, locked:false, ph:true },
-                { id:'FINAL', type:'F', h:'Winner SF1', a:'Winner SF2', hS:0, aS:0, hPK:0, aPK:0, p:false, locked:false, ph:true }
-            ] 
-        });
-    };
+ await setDoc(ref,{started:true,fixtures:f,ko:[],koGen:false});
+};
 
-    // --- LOGIC: SCORE ---
-    window.updateScore = async (id, side, val, field, isKO = false) => {
-        if(busy || !verifyAction(field)) return;
-        busy = true;
+// ===== SCORE =====
+window.mod=async(id,side,val)=>{
+ if(busy) return;
+ busy=true;
+ await runTransaction(db,async tx=>{
+  let s=await tx.get(ref); let d=s.data();
+  let i=d.fixtures.findIndex(m=>m.id===id);
+  let m=d.fixtures[i];
+  if(m.locked) return;
 
-        await runTransaction(db, async (tx) => {
-            const snap = await tx.get(ref);
-            const d = snap.data();
-            const list = isKO ? d.ko : d.fixtures;
-            const m = list.find(x => x.id === id);
+  lastAction=JSON.stringify(m);
+  m.p=true;
+  side==='h'?m.hS+=val:m.aS+=val;
 
-            if(m.locked) return;
-            m.p = true;
-            if(side === 'h') m.hS = Math.max(0, m.hS + val);
-            else m.aS = Math.max(0, m.aS + val);
+  tx.update(ref,{fixtures:d.fixtures});
+ });
+ setTimeout(()=>busy=false,200);
+};
 
-            tx.update(ref, isKO ? { ko: d.ko } : { fixtures: d.fixtures });
-        });
-        setTimeout(() => busy = false, 300);
-    };
+// ===== UNDO =====
+window.undo=async(id)=>{
+ if(!lastAction) return;
+ let last=JSON.parse(lastAction);
+ if(last.id!==id) return alert("Undo ล่าสุดเท่านั้น");
 
-    window.updatePK = async (id, side, val) => {
-        if(busy || !verifyAction(99)) return;
-        busy = true;
-        await runTransaction(db, async (tx) => {
-            const snap = await tx.get(ref);
-            const d = snap.data();
-            const m = d.ko.find(x => x.id === id);
-            if(side === 'h') m.hPK = Math.max(0, m.hPK + val);
-            else m.aPK = Math.max(0, m.aPK + val);
-            tx.update(ref, { ko: d.ko });
-        });
-        setTimeout(() => busy = false, 300);
-    };
+ await runTransaction(db,async tx=>{
+  let s=await tx.get(ref); let d=s.data();
+  let i=d.fixtures.findIndex(m=>m.id===id);
+  d.fixtures[i]=last;
+  tx.update(ref,{fixtures:d.fixtures});
+ });
 
-    window.lockMatch = async (id, isKO = false) => {
-        if(!confirm("ยืนยันการล็อคผล? ไม่สามารถแก้ไขได้หลังจากนี้")) return;
-        await runTransaction(db, async (tx) => {
-            const snap = await tx.get(ref);
-            const d = snap.data();
-            const list = isKO ? d.ko : d.fixtures;
-            const m = list.find(x => x.id === id);
-            m.locked = true;
-            tx.update(ref, isKO ? { ko: d.ko } : { fixtures: d.fixtures });
-        });
-    };
+ lastAction=null;
+};
 
-    // --- CALCULATIONS ---
-    function getTable(group) {
-        let d = {};
-        state.fixtures.filter(m => m.group === group).forEach(m => {
-            [m.h, m.a].forEach(t => { if(!d[t]) d[t] = { name:t, p:0, gd:0, pts:0 } });
-            if(!m.p) return;
-            d[m.h].p++; d[m.a].p++;
-            d[m.h].gd += (m.hS - m.aS); d[m.a].gd += (m.aS - m.hS);
-            if(m.hS > m.aS) d[m.h].pts += 3;
-            else if(m.aS > m.hS) d[m.a].pts += 3;
-            else { d[m.h].pts++; d[m.a].pts++; }
-        });
-        return Object.values(d).sort((a,b) => b.pts - a.pts || b.gd - a.gd);
-    }
+// ===== LOCK =====
+window.lock=async(id)=>{
+ if(!confirm("ล็อคผล?")) return;
 
-    const getWinner = (m) => {
-        if(m.hS !== m.aS) return m.hS > m.aS ? m.h : m.a;
-        return m.hPK > m.aPK ? m.h : m.a;
-    };
+ await runTransaction(db,async tx=>{
+  let s=await tx.get(ref); let d=s.data();
+  let i=d.fixtures.findIndex(m=>m.id===id);
+  d.fixtures[i].locked=true;
 
-    // --- RENDER ENGINE ---
-    function render() {
-        if(!state) {
-            document.getElementById("setup-area").classList.remove("hidden");
-            document.getElementById("main-area").classList.add("hidden");
-            return;
-        }
+  tryKO(d); // 🔥 generate knockout
 
-        document.getElementById("setup-area").classList.add("hidden");
-        document.getElementById("main-area").classList.remove("hidden");
+  tx.update(ref,d);
+ });
+};
 
-        const renderTable = (group, elId) => {
-            const data = getTable(group);
-            document.getElementById(elId).innerHTML = `<tr><th>ทีม</th><th>แข่ง</th><th>GD</th><th>แต้ม</th></tr>` +
-            data.map((t, i) => `<tr class="${i<2?'top-two':''}"><td>${t.name}</td><td>${t.p}</td><td>${t.gd}</td><td>${t.pts}</td></tr>`).join("");
-            return data;
-        };
+// ===== TABLE =====
+function calc(g){
+ let d={};
+ state.fixtures.filter(m=>m.group===g).forEach(m=>{
+  d[m.h]??={name:m.h,p:0,gd:0,pts:0};
+  d[m.a]??={name:m.a,p:0,gd:0,pts:0};
+ });
 
-        const rankA = renderTable('A', 'table-a');
-        const rankB = renderTable('B', 'table-b');
+ state.fixtures.filter(m=>m.p&&m.group===g).forEach(m=>{
+  d[m.h].p++; d[m.a].p++;
+  d[m.h].gd+=m.hS-m.aS;
+  d[m.a].gd+=m.aS-m.hS;
 
-        // Render Group Stage
-        const drawMatches = (field, elId) => {
-            document.getElementById(elId).innerHTML = state.fixtures.filter(m => m.field === field).map(m => `
-                <div class="match ${m.p && !m.locked ? 'live' : ''}">
-                    <div class="match-info">
-                        <div class="team-name" style="text-align:right">${m.h}</div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <button class="btn-score" onclick="updateScore('${m.id}','h',1,${field})">+</button>
-                            <div class="score-display">${m.hS} - ${m.aS}</div>
-                            <button class="btn-score" onclick="updateScore('${m.id}','a',1,${field})">+</button>
-                        </div>
-                        <div class="team-name" style="text-align:left">${m.a}</div>
-                    </div>
-                    ${!m.locked && document.body.dataset.role === 'admin' ? `<button class="btn-lock" onclick="lockMatch('${m.id}')">🔒 LOCK</button>` : ''}
-                </div>
-            `).join("");
-        };
-        drawMatches(1, 'fixtures-f1');
-        drawMatches(2, 'fixtures-f2');
+  if(m.hS>m.aS)d[m.h].pts+=3;
+  else if(m.aS>m.hS)d[m.a].pts+=3;
+  else{d[m.h].pts++;d[m.a].pts++;}
+ });
 
-        // --- AUTO KO GENERATION ---
-        if(state.fixtures.every(m => m.locked) && !state.koReady && document.body.dataset.role === 'admin') {
-            const ko = [...state.ko];
-            ko[0].h = rankA[0].name; ko[0].a = rankB[1].name; ko[0].ph = false;
-            ko[1].h = rankB[0].name; ko[1].a = rankA[1].name; ko[1].ph = false;
-            updateDoc(ref, { ko, koReady: true });
-        }
+ return Object.values(d).sort((a,b)=>b.pts-a.pts||b.gd-a.gd);
+}
 
-        // --- AUTO FINAL GENERATION ---
-        if(state.ko[0].locked && state.ko[1].locked && state.ko[2].ph && document.body.dataset.role === 'admin') {
-            const ko = [...state.ko];
-            ko[2].h = getWinner(ko[0]); ko[2].a = getWinner(ko[1]); ko[2].ph = false;
-            updateDoc(ref, { ko });
-        }
+// ===== KO =====
+function tryKO(d){
+ if(d.fixtures.filter(f=>f.locked).length===20 && !d.koGen){
+  let A=calc('A'), B=calc('B');
 
-        // Render KO Stage
-        document.getElementById("fixtures-ko").innerHTML = state.ko.map(m => `
-            <div class="match">
-                <div style="font-size:12px; color:#999; margin-bottom:5px;">${m.id}</div>
-                <div class="match-info">
-                    <div class="team-name" style="text-align:right">${m.h}</div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <button class="btn-score" onclick="updateScore('${m.id}','h',1,99,true)">+</button>
-                        <div class="score-display">${m.hS} - ${m.aS}</div>
-                        <button class="btn-score" onclick="updateScore('${m.id}','a',1,99,true)">+</button>
-                    </div>
-                    <div class="team-name" style="text-align:left">${m.a}</div>
-                </div>
-                ${m.p && m.hS === m.aS ? `
-                    <div class="pk-box">
-                        <b>ยิงจุดโทษ (PK):</b> ${m.hPK} - ${m.aPK} <br>
-                        <button class="admin" onclick="updatePK('${m.id}','h',1)">+ PK</button>
-                        <button class="admin" onclick="updatePK('${m.id}','a',1)">+ PK</button>
-                    </div>
-                ` : ''}
-                ${!m.locked && !m.ph && document.body.dataset.role === 'admin' ? `<button class="btn-lock" onclick="lockMatch('${m.id}', true)">🔒 LOCK</button>` : ''}
-            </div>
-        `).join("");
+  d.ko=[
+   {id:'SF1',h:A[0].name,a:B[1].name,hS:0,aS:0,hPK:0,aPK:0,p:false,locked:false},
+   {id:'SF2',h:B[0].name,a:A[1].name,hS:0,aS:0,hPK:0,aPK:0,p:false,locked:false},
+   {id:'FINAL',h:'-',a:'-',hS:0,aS:0,hPK:0,aPK:0,p:false,locked:false,ph:true}
+  ];
+  d.koGen=true;
+ }
+}
 
-        // CHAMPION DISPLAY
-        if(state.ko[2].locked) {
-            document.getElementById("champ-card").style.display = "block";
-            document.getElementById("champ-name").innerText = getWinner(state.ko[2]);
-        }
-    }
+function updateFinal(d){
+ if(!d.ko.length) return;
+ let [s1,s2,f]=d.ko;
 
-    onSnapshot(ref, (s) => {
-        if(s.exists()) {
-            state = s.data();
-            render();
-        }
-    });
+ if(s1.locked && s2.locked && f.ph){
+  const win=m=>m.hS!==m.aS?(m.hS>m.aS?m.h:m.a):(m.hPK>m.aPK?m.h:m.a);
+  f.h=win(s1); f.a=win(s2); f.ph=false;
+ }
+}
+
+// ===== RENDER =====
+function render(){
+ if(!state||!state.started){
+  setup.style.display="block"; main.style.display="none"; return;
+ }
+
+ setup.style.display="none"; main.style.display="block";
+
+ let A=calc('A'), B=calc('B');
+
+ tableA.innerHTML="<tr><th>ทีม</th><th>P</th><th>GD</th><th>PTS</th></tr>"+A.map((t,i)=>`
+ <tr class="${i<2?'top':''}"><td>${t.name}</td><td>${t.p}</td><td>${t.gd}</td><td>${t.pts}</td></tr>`).join('');
+
+ tableB.innerHTML="<tr><th>ทีม</th><th>P</th><th>GD</th><th>PTS</th></tr>"+B.map((t,i)=>`
+ <tr class="${i<2?'top':''}"><td>${t.name}</td><td>${t.p}</td><td>${t.gd}</td><td>${t.pts}</td></tr>`).join('');
+
+ f1.innerHTML = state.fixtures.filter(m=>m.field===1).map(card).join('');
+ f2.innerHTML = state.fixtures.filter(m=>m.field===2).map(card).join('');
+
+ updateFinal(state);
+
+ ko.innerHTML = state.ko.map(m=>`
+ <div>${m.id} : ${m.h} ${m.hS}-${m.aS} ${m.a}</div>`).join('');
+
+ if(state.ko[2] && state.ko[2].locked){
+  champ.innerText = state.ko[2].hS>state.ko[2].aS?state.ko[2].h:state.ko[2].a;
+ }
+}
+
+function card(m){
+ return `
+ <div class="card">
+ ${m.h}
+ <button class="plus admin" onclick="mod('${m.id}','h',1)">+</button>
+ ${m.hS}-${m.aS}
+ <button class="plus admin" onclick="mod('${m.id}','a',1)">+</button>
+ ${m.a}
+ <div class="admin">
+ <button onclick="undo('${m.id}')">undo</button>
+ <button onclick="lock('${m.id}')">lock</button>
+ </div>
+ </div>`;
+}
+
+onSnapshot(ref,s=>{
+ state = s.exists()?s.data():null;
+ render();
+});
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+function exportPDF(){
+ const { jsPDF } = window.jspdf;
+ const doc=new jsPDF();
+
+ doc.text("Tournament Result",10,10);
+
+ doc.save("result.pdf");
+}
+</script>
+
 </body>
 </html>
-
