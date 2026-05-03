@@ -10,36 +10,28 @@
         .header { background: var(--p); color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .container { padding: 15px; max-width: 800px; margin: auto; }
         .card { background: white; padding: 20px; border-radius: 18px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); margin-bottom: 15px; border-top: 6px solid var(--p); position: relative; }
-        
-        /* สิทธิ์การใช้งาน */
         .admin-only { display: none !important; }
         body[data-role="admin"] .admin-only { display: block !important; }
-
-        /* UI Matches */
         .fixture { padding: 18px; border-radius: 15px; background: white; margin-bottom: 12px; border: 2px solid transparent; transition: 0.3s; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .fixture.live { border-color: var(--live); background: #fffefe; animation: pulse-border 2s infinite; }
         .fixture.locked { background: #f8f9fa; opacity: 0.85; border-left: 6px solid #444; }
         @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(255,0,0,0.2); } 70% { box-shadow: 0 0 0 10px rgba(255,0,0,0); } 100% { box-shadow: 0 0 0 0 rgba(255,0,0,0); } }
-
         .status-badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
         .badge-live { background: var(--live); color: white; }
         .badge-done { background: #666; color: white; }
-
         .score-btn { width: 48px; height: 48px; font-size: 1.3rem; font-weight: bold; border-radius: 50%; border: 2px solid #ddd; background: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .score-btn:active { transform: scale(0.9); }
         .score-btn:disabled { cursor: default; opacity: 0.5; background: #eee; }
-
         .pk-text { font-size: 0.8rem; color: var(--s); font-weight: bold; margin-top: 5px; background: #fff3f0; padding: 2px 10px; border-radius: 10px; display: inline-block; }
         .tab-btn { flex: 1; padding: 14px; border: none; background: #ddd; font-weight: bold; cursor: pointer; border-radius: 10px; font-family: 'Kanit'; transition: 0.3s; }
         .tab-btn.active { background: var(--p); color: white; }
         .hidden { display: none !important; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px 5px; text-align: center; border-bottom: 1px solid #eee; }
         .team-input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ccc; font-family: 'Kanit'; }
-
         .champ-card { background: linear-gradient(135deg, #001a68, #0044ff); color: white; text-align: center; padding: 40px 20px; border-radius: 20px; margin-bottom: 20px; animation: slideDown 0.8s ease-out; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .placeholder-team { color: #aaa; font-style: italic; font-weight: 300; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;600&display=swap" rel="stylesheet">
 </head>
@@ -73,18 +65,12 @@
         </div>
         
         <div id="viewA">
-            <div class="card">
-                <h4 style="margin:0;">📊 ตารางคะแนน สาย A</h4>
-                <table id="tblA"><thead><tr><th style="text-align:left">ทีม</th><th>แข่ง</th><th>+/-</th><th>แต้ม</th></tr></thead><tbody></tbody></table>
-            </div>
+            <div class="card"><h4 style="margin:0;">📊 ตารางคะแนน สาย A</h4><table id="tblA"><thead><tr><th style="text-align:left">ทีม</th><th>แข่ง</th><th>+/-</th><th>แต้ม</th></tr></thead><tbody></tbody></table></div>
             <div id="listA"></div>
         </div>
         
         <div id="viewB" class="hidden">
-            <div class="card">
-                <h4 style="margin:0;">📊 ตารางคะแนน สาย B</h4>
-                <table id="tblB"><thead><tr><th style="text-align:left">ทีม</th><th>แข่ง</th><th>+/-</th><th>แต้ม</th></tr></thead><tbody></tbody></table>
-            </div>
+            <div class="card"><h4 style="margin:0;">📊 ตารางคะแนน สาย B</h4><table id="tblB"><thead><tr><th style="text-align:left">ทีม</th><th>แข่ง</th><th>+/-</th><th>แต้ม</th></tr></thead><tbody></tbody></table></div>
             <div id="listB"></div>
         </div>
 
@@ -98,9 +84,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, runTransaction, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot, runTransaction, enableIndexedDbPersistence, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // --- Firebase Configuration ---
     const firebaseConfig = {
         apiKey: "AIzaSyADq4d5bpQyM7OpdVqkGSdVfPcWqjFyZS0",
         authDomain: "yaring-football-7s.firebaseapp.com",
@@ -114,27 +99,17 @@
     const db = getFirestore(app);
     const docRef = doc(db, "tournaments", "yaring_ultimate_final");
 
-    // 1. Offline Persistence
-    enableIndexedDbPersistence(db).catch((err) => {
-        document.getElementById('net-status').innerText = "● Offline Mode";
-        console.warn("Persistence failed", err.code);
-    });
+    enableIndexedDbPersistence(db).catch(() => document.getElementById('net-status').innerText = "● Offline Mode");
 
     const TEAMS = ["กูตงวิทยา", "มุสลิมพัฒนศาสตร์", "ส่งเสริมศาสน์", "ปัญญาพัฒน์พิทยา", "กาลามุลลอฮ", "ดารุลอูลูมวิทยา", "สรรเสริญวิทยาคาร", "อนุบาลเลิศประชา", "ยะหริ่งวิทยา", "นูรุลอิสลาม"];
     let state = { started: false, fixtures: [], knockout: [], koGenerated: false };
     let lastClick = 0;
 
-    // 2. Authentication & Admin UI
     window.auth = () => {
-        const p = prompt("กรุณาใส่รหัสผ่านเจ้าหน้าที่:");
-        if(p === "admin123") { 
-            document.body.setAttribute('data-role', 'admin'); 
-            initAdminUI(); 
-        } else if(p === "staff123") { 
-            document.body.setAttribute('data-role', 'staff'); 
-        } else { 
-            document.body.setAttribute('data-role', 'user'); 
-        }
+        const p = prompt("รหัสเจ้าหน้าที่:");
+        if(p === "admin123") { document.body.setAttribute('data-role', 'admin'); initAdminUI(); }
+        else if(p === "staff123") { document.body.setAttribute('data-role', 'staff'); }
+        else { document.body.setAttribute('data-role', 'user'); }
         document.getElementById('role-txt').innerText = document.body.getAttribute('data-role');
         updateUI();
     };
@@ -142,7 +117,6 @@
     function preventDuplicateTeams() {
         const selects = document.querySelectorAll('.team-input');
         const selectedValues = Array.from(selects).map(s => s.value).filter(v => v !== "");
-
         selects.forEach(select => {
             const currentValue = select.value;
             Array.from(select.options).forEach(option => {
@@ -159,8 +133,7 @@
         box.innerHTML = `<div><h4>สาย A</h4><div id="selA"></div></div><div><h4>สาย B</h4><div id="selB"></div></div>`;
         ['selA', 'selB'].forEach(id => {
             for(let i=0; i<5; i++) {
-                const s = document.createElement('select'); 
-                s.className = 'team-input';
+                const s = document.createElement('select'); s.className = 'team-input';
                 s.innerHTML = `<option value="">--เลือกทีม--</option>` + TEAMS.map(t => `<option value="${t}">${t}</option>`).join('');
                 s.addEventListener('change', preventDuplicateTeams);
                 document.getElementById(id).appendChild(s);
@@ -168,53 +141,47 @@
         });
     }
 
-    // 3. Tournament Logic
     window.launchTournament = async () => {
         const vals = Array.from(document.querySelectorAll('.team-input')).map(s => s.value);
-        if(vals.includes("") || new Set(vals).size < 10) return alert("กรุณาเลือกทีมให้ครบ 10 ทีมและห้ามซ้ำกัน!");
-        
+        if(vals.includes("") || new Set(vals).size < 10) return alert("กรุณาเลือกทีมให้ครบ!");
         const tA = vals.slice(0, 5), tB = vals.slice(5, 10);
         const pairing = [[0,1],[2,3],[4,0],[1,2],[3,4],[0,2],[1,3],[4,2],[0,3],[1,4]];
         let f = [];
         pairing.forEach((pair, i) => {
-            const timeStr = (idx) => { 
-                let m = idx * 25; // 20 min match + 5 min break
-                let h = 9 + Math.floor(m/60);
-                return `${h.toString().padStart(2,'0')}:${(m%60).toString().padStart(2,'0')}`;
-            };
+            const timeStr = (idx) => { let m = idx * 25; let h = 9 + Math.floor(m/60); return `${h.toString().padStart(2,'0')}:${(m%60).toString().padStart(2,'0')}`; };
             f.push({ id:`A${i}`, g:'A', h:tA[pair[0]], a:tA[pair[1]], hS:0, aS:0, hPK:0, aPK:0, p:false, t:timeStr(i), pitch:'สนาม 1', locked: false });
             f.push({ id:`B${i}`, g:'B', h:tB[pair[0]], a:tB[pair[1]], hS:0, aS:0, hPK:0, aPK:0, p:false, t:timeStr(i), pitch:'สนาม 2', locked: false });
         });
-        await setDoc(docRef, { started: true, groupA: tA, groupB: tB, fixtures: f, knockout: [], koGenerated: false });
+        // สร้างกระดูกโครงรอบน็อคเอาท์รอไว้เลย
+        const koSkeleton = [
+            { id:'SF1', n:'Semi Final 1', h:'ที่ 1 สาย A', a:'ที่ 2 สาย B', hS:0, aS:0, hPK:0, aPK:0, p:false, t:'13:00', locked: false, isPlaceholder: true },
+            { id:'SF2', n:'Semi Final 2', h:'ที่ 1 สาย B', a:'ที่ 2 สาย A', hS:0, aS:0, hPK:0, aPK:0, p:false, t:'13:30', locked: false, isPlaceholder: true },
+            { id:'FINAL', n:'Final Match', h:'ผู้ชนะ SF1', a:'ผู้ชนะ SF2', hS:0, aS:0, hPK:0, aPK:0, p:false, t:'14:15', locked: false, isPlaceholder: true }
+        ];
+        await setDoc(docRef, { started: true, groupA: tA, groupB: tB, fixtures: f, knockout: koSkeleton, koGenerated: false });
     };
 
-    // 4. Atomic Score Transaction
     window.modScore = async (id, side, val, isKO=false, isPK=false) => {
         if(Date.now() - lastClick < 400) return; 
         lastClick = Date.now();
-
         try {
             await runTransaction(db, async (transaction) => {
                 const snap = await transaction.get(docRef);
                 const data = snap.data();
                 let list = isKO ? data.knockout : data.fixtures;
                 let m = list.find(x => x.id === id);
-
+                if(m.isPlaceholder) return; // ห้ามกดถ้ายังไม่มีทีมจริง
                 if(m.locked) throw "Match is locked!";
-                
                 m.p = true;
-                if(isPK) {
-                    side === 'h' ? m.hPK = Math.max(0, m.hPK + val) : m.aPK = Math.max(0, m.aPK + val);
-                } else {
-                    side === 'h' ? m.hS = Math.max(0, m.hS + val) : m.aS = Math.max(0, m.aS + val);
-                }
+                if(isPK) side === 'h' ? m.hPK = Math.max(0, m.hPK + val) : m.aPK = Math.max(0, m.aPK + val);
+                else side === 'h' ? m.hS = Math.max(0, m.hS + val) : m.aS = Math.max(0, m.aS + val);
                 transaction.update(docRef, { fixtures: data.fixtures, knockout: data.knockout });
             });
-        } catch (e) { alert("เกิดข้อผิดพลาด: " + e); }
+        } catch (e) { console.error(e); }
     };
 
     window.lockMatch = async (id, isKO=false) => {
-        if(!confirm("ยืนยันการปิดผลการแข่งขัน? เมื่อปิดแล้วจะไม่สามารถแก้ไขสกอร์ได้")) return;
+        if(!confirm("ยืนยันการปิดสกอร์?")) return;
         await runTransaction(db, async (transaction) => {
             const snap = await transaction.get(docRef);
             const data = snap.data();
@@ -224,7 +191,6 @@
         });
     };
 
-    // 5. UI Rendering & Real-time Update
     function updateUI() {
         if(!state.started) return;
         let rA, rB;
@@ -238,104 +204,7 @@
                 d[m.h].p++; d[m.a].p++; d[m.h].gd += (m.hS-m.aS); d[m.a].gd += (m.aS-m.hS);
                 if(m.hS > m.aS) d[m.h].pts += 3; else if(m.aS > m.hS) d[m.a].pts += 3; else { d[m.h].pts += 1; d[m.a].pts += 1; }
             });
-
             const sorted = [...teams].sort((a,b) => d[b].pts - d[a].pts || d[b].gd - d[a].gd);
             if(g==='A') rA = sorted; else rB = sorted;
-            
             document.querySelector(`#tbl${g} tbody`).innerHTML = sorted.map(t => `<tr><td style="text-align:left"><b>${t}</b></td><td>${d[t].p}</td><td>${d[t].gd}</td><td><b>${d[t].pts}</b></td></tr>`).join('');
-            document.getElementById(`list${g}`).innerHTML = state.fixtures.filter(f => f.g === g).map(f => {
-                const [h, m] = f.t.split(':').map(Number);
-                const isLive = nowMins >= (h*60) && nowMins < (h*60 + 25) && !f.locked;
-                return `
-                <div class="fixture ${f.locked ? 'locked' : ''} ${isLive ? 'live' : ''}">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                        <span style="font-size:0.7rem; font-weight:600; color:var(--p);">⏱ ${f.t} | ${f.pitch}</span>
-                        ${isLive ? '<span class="status-badge badge-live">🔴 LIVE</span>' : ''}
-                        ${f.locked ? '<span class="status-badge badge-done">LOCKED 🔒</span>' : ''}
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="flex:1"><b>${f.h}</b></div>
-                        <div style="display:flex; gap:10px; align-items:center;">
-                            <button class="score-btn" ${f.locked ? 'disabled' : ''} onclick="modScore('${f.id}','h',1)">${f.hS}</button> : 
-                            <button class="score-btn" ${f.locked ? 'disabled' : ''} onclick="modScore('${f.id}','a',1)">${f.aS}</button>
-                        </div>
-                        <div style="flex:1; text-align:right"><b>${f.a}</b></div>
-                    </div>
-                    <div class="admin-only" style="margin-top:12px; text-align:center;">
-                        <button onclick="lockMatch('${f.id}')" style="font-size:0.7rem; cursor:pointer;">ปิดสกอร์ถาวร</button>
-                    </div>
-                </div>`;
-            }).join('');
-        });
-
-        // Knockout Phase Trigger
-        if(state.fixtures.filter(f=>f.locked).length === 20 && !state.koGenerated) {
-            const ko = [
-                { id:'SF1', n:'รอบรองฯ 1 (A1 vs B2)', h:rA[0], a:rB[1], hS:0, aS:0, hPK:0, aPK:0, p:false, t:'13:00', locked: false },
-                { id:'SF2', n:'รอบรองฯ 2 (B1 vs A2)', h:rB[0], a:rA[1], hS:0, aS:0, hPK:0, aPK:0, p:false, t:'13:30', locked: false }
-            ];
-            setDoc(docRef, { ...state, knockout: ko, koGenerated: true });
-        }
-
-        if(state.knockout.length > 0) {
-            let h = `<div class="card" style="border-top-color:var(--live)"><h4>🏆 รอบ Knockout (น็อคเอาท์)</h4>`;
-            state.knockout.forEach(f => {
-                const isDraw = f.p && f.hS === f.aS;
-                h += `<div class="fixture ${f.locked ? 'locked' : ''}">
-                        <div style="font-size:0.75rem; color:red; font-weight:bold;">${f.n}</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                            <div style="flex:1"><b>${f.h}</b></div>
-                            <div style="text-align:center;">
-                                <div style="display:flex; gap:10px;">
-                                    <button class="score-btn" ${f.locked ? 'disabled' : ''} onclick="modScore('${f.id}','h',1,true)">${f.hS}</button> : 
-                                    <button class="score-btn" ${f.locked ? 'disabled' : ''} onclick="modScore('${f.id}','a',1,true)">${f.aS}</button>
-                                </div>
-                                ${isDraw ? `<div class="pk-text">จุดโทษ: ${f.hPK} - ${f.aPK}</div>
-                                    <div class="admin-only" style="margin-top:5px;">
-                                        <button onclick="modScore('${f.id}','h',1,true,true)">+H</button>
-                                        <button onclick="modScore('${f.id}','a',1,true,true)">+A</button>
-                                    </div>` : ''}
-                            </div>
-                            <div style="flex:1; text-align:right"><b>${f.a}</b></div>
-                        </div>
-                        <div class="admin-only" style="text-align:center; margin-top:10px;">
-                            <button onclick="lockMatch('${f.id}', true)" style="font-size:0.7rem;">ล็อกผลนัดนี้</button>
-                        </div>
-                    </div>`;
-            });
-
-            // Final Generation
-            if(state.knockout.filter(k=>k.locked).length === 2 && state.knockout.length === 2) {
-                const getW = (m) => m.hS !== m.aS ? (m.hS > m.aS ? m.h : m.a) : (m.hPK > m.aPK ? m.h : m.a);
-                state.knockout.push({ id:'FINAL', n:'รอบชิงชนะเลิศ', h:getW(state.knockout[0]), a:getW(state.knockout[1]), hS:0, aS:0, hPK:0, aPK:0, p:false, t:'14:15', locked: false });
-                updateDoc(docRef, { knockout: state.knockout });
-            }
-
-            const fin = state.knockout.find(x => x.id === 'FINAL');
-            if(fin && fin.locked) {
-                const win = fin.hS !== fin.aS ? (fin.hS > fin.aS ? fin.h : fin.a) : (fin.hPK > fin.aPK ? fin.h : fin.a);
-                document.getElementById('champion-win').innerHTML = `<div class="champ-card"><h1>🏆 CHAMPION 🏆</h1><h2 style="font-size:2.4rem;">${win}</h2><p>ยินดีด้วยกับแชมป์ FOOTBALL LIVE 2026</p></div>`;
-                document.getElementById('champion-win').classList.remove('hidden');
-            }
-            document.getElementById('ko-area').innerHTML = h + `</div>`;
-        }
-    }
-
-    // Tab & Backup Functions
-    window.tab = (g) => {
-        document.getElementById('viewA').classList.toggle('hidden', g!=='A');
-        document.getElementById('viewB').classList.toggle('hidden', g!=='B');
-        document.getElementById('tA').classList.toggle('active', g==='A');
-        document.getElementById('tB').classList.toggle('active', g==='B');
-    };
-    window.downloadBackup = () => {
-        const b = new Blob([JSON.stringify(state)], {type: 'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'yaring_tos_backup.json'; a.click();
-    };
-    window.fullReset = async () => { if(confirm("ล้างข้อมูลทั้งหมด?")) await setDoc(docRef, { started: false }); };
-
-    onSnapshot(docRef, (snap) => { if(snap.exists()) { state = snap.data(); updateUI(); } });
-    setInterval(updateUI, 30000); // Auto-refresh LIVE status every 30s
-</script>
-</body>
-</html>
+            document.getElementById(`list${g}`).innerHTML = state.fixtures.filter(f => f.g === g).map(
